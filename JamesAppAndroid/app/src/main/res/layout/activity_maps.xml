@@ -1,8 +1,173 @@
-<fragment xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:map="http://schemas.android.com/apk/res-auto"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/map"
-    android:name="com.google.android.gms.maps.SupportMapFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="co.jamesapp.android.MapsActivity" />
+    tools:context=".MapsActivity" >
+
+    <fragment xmlns:map="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/map"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        class="com.google.android.gms.maps.SupportMapFragment"
+        tools:layout="@layout/activity_maps"/>
+
+    <RadioGroup
+            android:id="@+id/package_size_radiogroup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="#FFFFFF"
+            android:padding="4dp" >
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:srcCompat="@drawable/package_logo"
+                android:id="@+id/imageView"
+                android:gravity="center_horizontal|center_vertical"/>
+
+            <TextView
+                android:text="@string/package_size"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/textView"
+                android:textColor="#93278F"
+                android:textSize="14sp" />
+
+            <RadioButton
+                android:id="@+id/smallPackage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/small"
+                android:gravity="center_horizontal|center_vertical"
+                android:layout_weight="1"
+                android:textColor="#93278F" />
+
+            <RadioButton
+                android:id="@+id/midiumPackage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal|center_vertical"
+                android:text="@string/midium"
+                android:layout_weight="1"
+                android:textColor="#93278F" />
+
+            <RadioButton
+                android:id="@+id/largePackage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal|center_vertical"
+                android:text="@string/large"
+                android:layout_weight="1"
+                android:textColor="#93278F" />
+        </RadioGroup>
+    <!--<View-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="1dp"-->
+        <!--android:background="#FFFFFF"/>-->
+
+    <RadioGroup
+            android:id="@+id/pickup_time_radiogroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="50dp"
+            android:background="#FFFFFF"
+            android:padding="4dp"
+        tools:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:srcCompat="@drawable/pickup_time"
+                android:id="@+id/imageView"
+                android:gravity="center_horizontal|center_vertical"/>
+
+            <TextView
+                android:text="@string/pickupTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/textView"
+                android:textColor="#93278F"
+                android:textSize="14sp" />
+
+            <RadioButton
+                android:id="@+id/pickupNow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/now"
+                android:gravity="center_horizontal|center_vertical"
+                android:layout_weight="1"
+                android:textColor="#93278F"
+                tools:text="Now" />
+            <RadioButton
+                android:id="@+id/pickupAt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal|center_vertical"
+                android:text="@string/today"
+                android:layout_weight="1"
+                android:textColor="#93278F"
+                tools:text="Today at:" />
+        <TextView
+            android:id="@+id/pickupItemText"
+            android:text=""
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#93278F"
+            android:textSize="14sp" />
+    </RadioGroup>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:id="@+id/pickupTimeListViewContainer"
+        android:layout_marginTop="90dp"
+        android:gravity="center"
+        android:background="#E6E7E8"
+        android:visibility="invisible">
+
+        <ListView
+            android:id="@+id/pickupTimeListView"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:layout_gravity="center_vertical"
+            android:gravity="center"
+            android:textAlignment="center">
+        </ListView>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/submitPickUpTime"
+            android:background="#DB831B"
+            android:textColor="#FFFF"
+            android:text="@string/ok"
+            tools:text="ok"
+            android:textAlignment="center"
+            android:gravity="center_vertical" />
+    </LinearLayout>
+    <RadioGroup
+        android:id="@+id/vehicleType"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#FFFFFF"
+        android:padding="4dp"
+        android:layout_gravity="bottom"
+        tools:orientation="horizontal">
+        <RadioButton
+            android:id="@+id/bicycle"
+             android:button="@drawable/bicycle"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"/>
+        <RadioButton
+            android:id="@+id/vispa"
+            android:button="@drawable/vispa"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"/>
+    </RadioGroup>
+
+</FrameLayout>
+
