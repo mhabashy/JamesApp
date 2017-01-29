@@ -4,4 +4,12 @@
     <string name="default_info_title">Default Location</string>
     <string name="default_info_snippet">No places found, because location permission is disabled.</string>
     <string name="title_activity_maps">Map</string>
+    <string name="midium">Midium</string>
+    <string name="small">Small</string>
+    <string name="large">large</string>
+    <string name="package_size">Package Size</string>
+    <string name="pickupTime">Pickup Time</string>
+    <string name="now">Now</string>
+    <string name="today">Today at:</string>
+    <string name="ok">ok</string>
 </resources>
