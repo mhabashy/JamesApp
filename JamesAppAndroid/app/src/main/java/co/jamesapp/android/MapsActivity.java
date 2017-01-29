@@ -10,9 +10,19 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import co.jamesapp.android.R;
 //import com.example.currentplacedetailsonmap.R;
@@ -33,12 +43,20 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.wearable.Asset;
 
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
+
+import static android.widget.RadioGroup.*;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
@@ -151,8 +169,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         getDeviceLocation();
         // Build the map.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
+                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+
     }
 
     /**
@@ -231,9 +251,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (mCameraPosition != null) {
             mMap.moveCamera(CameraUpdateFactory.newCameraPosition(mCameraPosition));
         } else if (mCurrentLocation != null) {
-            mMap.addMarker(new MarkerOptions()
-                    .position(new LatLng(mCurrentLocation.getLatitude(),mCurrentLocation.getLongitude()))
-                    .title("Current Location"));
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                     new LatLng(mCurrentLocation.getLatitude(),
                             mCurrentLocation.getLongitude()), DEFAULT_ZOOM));
@@ -242,6 +259,57 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM));
             mMap.getUiSettings().setMyLocationButtonEnabled(false);
         }
+
+
+        Calendar cal = Calendar.getInstance();
+        int hours = cal.get(Calendar.HOUR_OF_DAY);
+
+        String[] values = {"Android","IPhone","WindowsMobile"};
+        final ArrayList<String> list = new ArrayList<String>();
+        for (int i = 0; i < 5; ++i) {
+            list.add(String.valueOf(hours));
+            hours++;
+        }
+        final ArrayAdapter adapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_spinner_item, list);
+
+
+    final RadioGroup pickup = (RadioGroup) findViewById(R.id.pickup_time_radiogroup);
+        pickup.setOnCheckedChangeListener(new OnCheckedChangeListener()
+        {
+              @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                Toast.makeText(getApplicationContext(), "Your toast message.",
+                        Toast.LENGTH_SHORT).show();
+                 final LinearLayout listViewContainer = (LinearLayout) findViewById(R.id.pickupTimeListViewContainer);
+                  final ListView listView = (ListView) findViewById(R.id.pickupTimeListView);
+                  final Button btnTag = (Button)findViewById(R.id.submitPickUpTime);
+//                  RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) listView.getLayoutParams();
+//                 params.height = 100;
+                  // RecyclerView.LayoutParams buttonParams = (RecyclerView.LayoutParams) btnTag.getLayoutParams();
+
+
+                  listView.setAdapter(adapter);
+                //  btnTag.setVisibility(View.VISIBLE);
+                    listViewContainer.setVisibility(View.VISIBLE);
+                listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                        Toast.makeText(getApplicationContext(), "In Click.",
+                                Toast.LENGTH_SHORT).show();
+                        TextView pickItemText = (TextView) findViewById(R.id.pickupItemText);
+
+                        String selectedFromList =(String) (listView.getItemAtPosition(position));
+                        pickItemText.setText(selectedFromList);
+                    }
+                });
+
+
+
+            }
+
+        });
     }
 
     /**
@@ -362,9 +430,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                         mMap.addMarker(new MarkerOptions()
                                 .position(new LatLng(mCurrentLocation.getLatitude(),mCurrentLocation.getLongitude()))
-                                .title("Current Location"));
+                                .title("Current Location")
+                                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker)));
                   // }
-                    // Release the place likelihood buffer.
+                    // Rxelease the place likelihood buffer.
 
                    // likelyPlaces.release();
                //}
