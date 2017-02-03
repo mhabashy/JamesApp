@@ -102,9 +102,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             mCurrentLocation = savedInstanceState.getParcelable(KEY_LOCATION);
             mCameraPosition = savedInstanceState.getParcelable(KEY_CAMERA_POSITION);
         }
+        SharedPreferences sharedPref = MapsActivity.this.getPreferences(Context.MODE_PRIVATE);
 
+//          if(sharedPref.contains("email")){
+            setContentView(R.layout.activity_maps);
+//          }else{
+//              Intent intent = new Intent(MapsActivity.this, LoginActivity.class);
+//              startActivity(intent);
+//          }
         // Retrieve the content view that renders the map.
-        setContentView(R.layout.activity_maps);
         // Build the Play services client for use by the Fused Location Provider and the Places API.
         buildGoogleApiClient();
         mGoogleApiClient.connect();
