@@ -29,8 +29,9 @@ def requires_auth(f):
 @app.route("/api/")
 @requires_auth
 def api():
-    #database.db.drop_all()
+    database.db.drop_all()
     database.db.create_all()
+    database.db.update(database.Users)
     return "OK"
 
 @app.route("/api/users/<action>/", methods=['GET'])
