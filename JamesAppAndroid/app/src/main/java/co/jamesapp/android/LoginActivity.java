@@ -90,31 +90,7 @@ public class LoginActivity extends AppCompatActivity {
             });
 
             //TEST
-            Button sign = (Button) findViewById(R.id.sign);
-            sign.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    //GetMethod.class.;
-                    String tempString;
-                    AsyncTask<String, Integer, String> tempA = new GetMethod().execute("http://159.203.131.184/api/users/select/?id=1");
-                    try {
-                        tempString = tempA.get();
-                        Log.d("STATUS", tempString.toString());
-                        Log.d("JSONSTATUS", getTheStatus(tempString));
-                        Gson gson = new Gson();
-                        Users myUsers = gson.fromJson(getTheData(tempString), Users.class);
-                        Log.d("Email", myUsers.getEmail());
-                        String jo = gson.toJson(myUsers);
-                        Log.d("Back to list", jo);
-                        Toast.makeText(LoginActivity.this, myUsers.getEmail(), Toast.LENGTH_SHORT).show();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    } catch (ExecutionException e) {
-                        e.printStackTrace();
-                    }
-                    //(getTheStatus(temp.toString()));
-                }
-            });
+
 
 
 

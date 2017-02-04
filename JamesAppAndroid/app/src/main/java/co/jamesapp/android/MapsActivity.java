@@ -5,12 +5,14 @@ import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -48,13 +50,20 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.gson.Gson;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ExecutionException;
 
+
+import co.jamesapp.android.Class.Users;
 
 import static android.widget.RadioGroup.*;
 
@@ -204,6 +213,45 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     /**
      * Handles the callback when location changes.
      */
+
+    public String getTheStatus(String c) {
+
+        String status = "";
+        try {
+            JSONObject jsonObject = new JSONObject(c);
+            status = jsonObject.getString("status");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return status;
+    }
+
+    public String getTheData(String c) {
+
+        String data = "";
+        try {
+            JSONObject jsonObject = new JSONObject(c);
+            data = jsonObject.getString("data");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return data;
+    }
+
+    public String getLastID(String c) {
+
+        String data = "";
+        try {
+            JSONObject jsonObject = new JSONObject(c);
+            data = jsonObject.getString("lastid");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return data;
+    }
     @Override
     public void onLocationChanged(Location location) {
         mCurrentLocation = location;
@@ -211,7 +259,44 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                 new LatLng(mCurrentLocation.getLatitude(),
                         mCurrentLocation.getLongitude()), DEFAULT_ZOOM));
-    }
+
+        Geocoder geocoder;
+        List<android.location.Address> addresses = null;
+        geocoder = new Geocoder(this, Locale.getDefault());
+        try {
+            addresses = geocoder.getFromLocation(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude(), 1);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+            String address = addresses.get(0).getAddressLine(0);
+            String state = addresses.get(0).getAdminArea();
+            String country = addresses.get(0).getCountryName();
+            String city = addresses.get(0).getLocality();
+            String postalCode = addresses.get(0).getPostalCode();
+            String knownName = addresses.get(0).getFeatureName();
+        Toast.makeText(getApplicationContext(), "Address."+ address + city+state+country,
+                Toast.LENGTH_LONG).show();
+                String tempString;
+                AsyncTask<String, Integer, String> tempA = new GetMethod().execute("http://159.203.131.184/api/riders/insert/?email=Blalskda.michael@gmail.com&rating=0&rider_x="+mCurrentLocation.getLongitude()+"&rider_y="+mCurrentLocation.getLatitude()+"&rider_address="+address + city+state+country);
+                try {
+                    tempString = tempA.get();
+                    Log.d("STATUS", tempString.toString());
+                    Log.d("JSONSTATUS", getTheStatus(tempString));
+                    Gson gson = new Gson();
+
+                    Toast.makeText(MapsActivity.this,getLastID(tempString) , Toast.LENGTH_SHORT).show();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                }
+
+                //(getTheStatus(temp.toString()));
+            }
+
+
+
 
     /**
      * Manipulates the map when it's available.
