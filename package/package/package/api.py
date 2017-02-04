@@ -29,8 +29,8 @@ def requires_auth(f):
 @app.route("/api/")
 @requires_auth
 def api():
-    database.create_all()
-    database.db.update(database.Users)
+    #database.db.drop_all()
+    database.db.create_all()
     return "OK"
 
 @app.route("/api/users/<action>/", methods=['GET'])
@@ -60,6 +60,72 @@ def users(action):
         elif action == "passwordcheck" and 'email' in request.args:
             u = database.Users.query.filter_by(email=request.args.get('email')).first()
             data['bool'] = u.Check_Password(request.args.get('password'))
+            data['status'] = 'success'
+        else:
+            data['data'] = {}
+            data['status'] = 'success'
+    except Exception as e:
+        data['message'] = str(e)
+    finally:
+        return json.dumps(data)
+
+
+@app.route("/api/riders/<action>/", methods=['GET'])
+@requires_auth
+def riders(action):
+    data = {'status': 'fail'}
+    try:
+        if action == "insert":
+            s = dict(request.args)
+            s1 = {}
+            for k, v in enumerate(s):
+                s1[v] = s[v][0]
+            u = database.Riders(**s1)
+            database.db.session.add(u)
+            database.db.session.commit()
+            data['lastid'] = u.id
+            data['status'] = 'success'
+        elif action == "select" and 'email' in request.args:
+            s = database.Riders.query.filter_by(email=request.args.get('email')).first()
+            data['data'] = s.Get_Rider_Info()
+            #data['data'] = s.as_dict()
+            data['status'] = 'success'
+        elif action == "select" and 'id' in request.args:
+            s = database.Riders.query.filter_by(id=int(request.args.get('id'))).first()
+            data['data'] = s.Get_Rider_Info()
+            #data['data'] = s.as_dict()
+            data['status'] = 'success'
+        elif action == "select":
+            s = database.Riders.query.filter().all()
+            data['data'] = [x.Get_Rider_Info() for x in s]
+            data['status'] = 'success'
+        else:
+            data['data'] = {}
+            data['status'] = 'success'
+    except Exception as e:
+        data['message'] = str(e)
+    finally:
+        return json.dumps(data)
+
+@app.route("/api/ride/<action>/", methods=['GET'])
+@requires_auth
+def rider(action):
+    data = {'status': 'fail'}
+    try:
+        if action == "insert":
+            s = dict(request.args)
+            s1 = {}
+            for k, v in enumerate(s):
+                s1[v] = s[v][0]
+            u = database.Rider(**s1)
+            database.db.session.add(u)
+            database.db.session.commit()
+            data['lastid'] = u.id
+            data['status'] = 'success'
+        elif action == "select" and 'email' in request.args:
+            s = database.Users.query.filter_by(id=int(request.args.get('email'))).first()
+            #data['data'] = s.Get_User_Info()
+            data['user'] = s.as_dict()
             data['status'] = 'success'
         else:
             data['data'] = {}
