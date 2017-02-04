@@ -26,6 +26,8 @@ class Users(db.Model):
     lastname = db.Column(db.String(100))
     created = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     temp_password = db.Column(db.String(255))
+    rider_id = db.relationship('Riders', backref='Users', lazy='dynamic', primaryjoin="Users.id==Riders.user_id")
+    driver_id = db.relationship('Drivers', backref='Users', lazy='dynamic', primaryjoin="Users.id==Drivers.user_id")
 
     def __init__(self, email, password, fname, lname):
         self.email = email
@@ -67,13 +69,18 @@ class Riders(db.Model):
     #ride_rider_rating = db.relationship('Ride', backref='Riders', lazy='dynamic', primaryjoin="Riders.rating==Ride.rider_rating")
     credit_rider_id = db.relationship('Credit', backref='Riders', lazy='dynamic', primaryjoin="Credit.rider_id==Riders.id")
     PayPal_rider_id = db.relationship('PayPal', backref='Riders', lazy='dynamic', primaryjoin="PayPal.rider_id==Riders.id")
+    Car_rider_id = db.relationship('Car', backref='Riders', lazy='dynamic', primaryjoin="Car.rider_id==Riders.id")
+    Bike_rider_id = db.relationship('Bike', backref='Riders', lazy='dynamic', primaryjoin="Bike.rider_id==Riders.id")
+    Motorcycle_rider_id = db.relationship('Motorcycle', backref='Riders', lazy='dynamic', primaryjoin="Motorcycle.rider_id==Riders.id")
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+
 
     def __init__(self, email, rating, rider_x, rider_y, rider_address):
         self.email = email
         self.rating = rating
         self.rider_x = rider_x
         self.rider_y = rider_y
-        self.rider_address  = rider_address
+        self.rider_address = rider_address
 
     def Get_Rider_Info(self):
         return {
@@ -82,7 +89,8 @@ class Riders(db.Model):
                     'rating': self.rating,
                     'rider_x': self.rider_x,
                     'rider_y': self.rider_y,
-                    'rider_address': self.rider_address
+                    'rider_address': self.rider_address,
+                    'user_id':self.user_id
                 }
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.Columns}
@@ -100,8 +108,10 @@ class Drivers(db.Model):
     driver_address = db.Column(db.String(500))
     car_type = db.Column(db.String(255))
     active = db.Column(db.Boolean, default=False, nullable=False)
-    ride_driver_rating = db.relationship('Ride', backref='Drivers', lazy='dynamic', primaryjoin="Drivers.rating==Ride.driver_rating")
+    #ride_driver_rating = db.relationship('Ride', backref='Drivers', lazy='dynamic', primaryjoin="Drivers.rating==Ride.driver_rating")
     ride_driver_id = db.relationship('Ride', backref='Drivers', lazy='dynamic', primaryjoin="Drivers.id==Ride.driver_id")
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+
 
     def __init__(self, email, rating, driver_x, driver_y, driver_address, car_type, active):
         self.email = email
@@ -121,7 +131,8 @@ class Drivers(db.Model):
                     'driver_y': self.driver_y,
                     'driver_address': self.driver_address,
                     'car_type': self.car_type,
-                    'active': self.active
+                    'active': self.active,
+                    'user_id': self.user_id
                 }
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.Columns}
@@ -159,6 +170,7 @@ class Package(db.Model):
     height = db.Column(db.Float)
     width = db.Column(db.Float)
     price = db.Column(db.Float)
+    ride_id = db.relationship('Ride', backref='Package', lazy='dynamic', primaryjoin="Package.id==Ride.package_id")
 
     def __init__(self, size, height, width, price):
         self.size = size
@@ -194,6 +206,7 @@ class Ride(db.Model):
     drop_off_y = db.Column(db.String(255))
     drop_off_address = db.Column(db.String(500))
     ride_type = db.Column(db.String(200))
+    package_id = db.Column(db.Integer, db.ForeignKey('package.id'))
     #rider_rating = db.Column(db.Integer, db.ForeignKey('riders.rating'))
     #driver_rating = db.Column(db.Integer, db.ForeignKey('drivers.rating'))
 
@@ -223,7 +236,8 @@ class Ride(db.Model):
                     'drop_off_address': self.drop_off_address,
                     'ride_type': self.ride_type,
                     'rider_rating': self.rider_rating,
-                    'driver_rating': self.driver_rating
+                    'driver_rating': self.driver_rating,
+                    'package_id': self.package_id
                 }
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.Columns}
@@ -240,6 +254,7 @@ class Car(db.Model):
     driver_id = db.Column(db.String(250))
     car_type = db.Column(db.String(250))
     car_year = db.Column(db.String(20))
+    rider_id = db.Column(db.Integer, db.ForeignKey('riders.id'))
 
     def __init__(self, model, plate_number, driver_id, car_type, car_year):
         self.id = id
@@ -256,7 +271,8 @@ class Car(db.Model):
                     'plate_number': self.plate_number,
                     'driver_id': self.driver_id,
                     'car_type': self.car_type,
-                    'car_year': self.car_year
+                    'car_year': self.car_year,
+                    'rider_id': self.rider_id
                 }
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.Columns}
@@ -273,13 +289,14 @@ class Motorcycle(db.Model):
     driver_id = db.Column(db.String(250))
     motorcycle_type = db.Column(db.String(250))
     motorcycle_year = db.Column(db.String(20))
+    rider_id = db.Column(db.Integer, db.ForeignKey('riders.id'))
 
     def __init__(self, model, plate_number, driver_id, motorcycle_type, motorcycle_year):
         self.model = model
         self.plate_number = plate_number
         self.driver_id = driver_id
-        self.car_type = motorcycle_type
-        self.car_year = motorcycle_year
+        self.motorcycle_type = motorcycle_type
+        self.motorcycle_year = motorcycle_year
 
     def Get_Motorcycle_Info(self):
         return {
@@ -288,7 +305,8 @@ class Motorcycle(db.Model):
                     'plate_number': self.plate_number,
                     'driver_id': self.driver_id,
                     'motorcycle_type': self.motorcycle_type,
-                    'motorcycle_year': self.motorcycle_year
+                    'motorcycle_year': self.motorcycle_year,
+                    'rider_id': self.rider_id
                 }
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.Columns}
@@ -302,6 +320,7 @@ class Bike(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     model = db.Column(db.String(200))
     driver_id = db.Column(db.String(250))
+    rider_id = db.Column(db.Integer, db.ForeignKey('riders.id'))
 
     def __init__(self, model, driver_id):
         self.model = model
@@ -312,7 +331,7 @@ class Bike(db.Model):
                     'id': self.id,
                     'model': self.model,
                     'driver_id': self.driver_id,
-                    'motorcycle_year': self.motorcycle_year
+                    'rider_id': self.rider_id
                 }
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.Columns}
@@ -385,6 +404,6 @@ class PayPal(db.Model):
         return '<PayPal %r:% r>' % (self.id)
 
 if __name__ == "__main__":
-    db.drop_all()
+    #db.drop_all()
     db.create_all()
     print("CHECKED")
