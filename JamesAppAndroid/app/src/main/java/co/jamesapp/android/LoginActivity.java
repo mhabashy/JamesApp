@@ -13,6 +13,7 @@ import android.support.v7.util.AsyncListUtil;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.gms.appindexing.Action;
@@ -26,6 +27,7 @@ import org.json.JSONObject;
 
 import java.util.concurrent.ExecutionException;
 
+import co.jamesapp.android.Class.GetJson;
 import co.jamesapp.android.Class.Users;
 
 
@@ -36,32 +38,8 @@ public class LoginActivity extends AppCompatActivity {
      */
     private GoogleApiClient client;
 
-    public String getTheStatus(String c) {
-
-        String status = "";
-        try {
-            JSONObject jsonObject = new JSONObject(c);
-            status = jsonObject.getString("status");
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        return status;
-    }
-
-    public String getTheData(String c) {
-
-        String data = "";
-        try {
-            JSONObject jsonObject = new JSONObject(c);
-            data = jsonObject.getString("data");
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        return data;
-    }
-
+    EditText email;
+    EditText password;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,33 +69,85 @@ public class LoginActivity extends AppCompatActivity {
 
             //TEST
             Button sign = (Button) findViewById(R.id.sign);
-            sign.setOnClickListener(new View.OnClickListener() {
+
+            email = (EditText) findViewById(R.id.email);
+            password = (EditText) findViewById(R.id.password);
+
+            // GET EXAMPLE
+
+//            sign.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View v) {
+//                    //GetMethod.class.;
+//                    String tempString;
+//                    AsyncTask<String, Integer, String> tempA = new GetMethod().execute("http://159.203.131.184/api/users/select/?id=1");
+//                    try {
+//                        tempString = tempA.get();
+//                        Log.d("STATUS", tempString.toString());
+//                        Log.d("JSONSTATUS", getStatus(tempString));
+//                        Gson gson = new Gson();
+//                        Users myUsers = gson.fromJson(getTheData(tempString), Users.class);
+//                        Log.d("Email", myUsers.getEmail());
+//                        String jo = gson.toJson(myUsers);
+//                        Log.d("Back to list", jo);
+//                        Toast.makeText(LoginActivity.this, myUsers.getEmail(), Toast.LENGTH_SHORT).show();
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    } catch (ExecutionException e) {
+//                        e.printStackTrace();
+//                    }
+//                    //(getStatus(temp.toString()));
+//                }
+//            });
+
+            // POST EXAMPLE
+
+            sign.setOnClickListener(new View.OnClickListener(){
                 @Override
-                public void onClick(View v) {
-                    //GetMethod.class.;
+                public void onClick(View v){
+//                    //GetMethod.class.;
                     String tempString;
-                    AsyncTask<String, Integer, String> tempA = new GetMethod().execute("http://159.203.131.184/api/users/select/?id=1");
-                    try {
-                        tempString = tempA.get();
-                        Log.d("STATUS", tempString.toString());
-                        Log.d("JSONSTATUS", getTheStatus(tempString));
-                        Gson gson = new Gson();
-                        Users myUsers = gson.fromJson(getTheData(tempString), Users.class);
-                        Log.d("Email", myUsers.getEmail());
-                        String jo = gson.toJson(myUsers);
-                        Log.d("Back to list", jo);
-                        Toast.makeText(LoginActivity.this, myUsers.getEmail(), Toast.LENGTH_SHORT).show();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    } catch (ExecutionException e) {
-                        e.printStackTrace();
+                    PostMethod pm = new PostMethod();
+                    GetJson gj = new GetJson();
+                    Gson gs = new Gson();
+                    Log.i("EMAIL", email.getText().toString());
+                    Log.i("Password", password.getText().toString());
+                    if( !(email.getText()).toString().equals("") && !(password.getText().toString()).equals("")) {
+                        pm.setList("email", email.getText().toString());
+                        pm.setList("password", password.getText().toString());
+                        AsyncTask<String, Integer, String> tempA = pm.execute("http://159.203.131.184/api/users/post/");                    try {
+                            tempString = tempA.get();
+                            if(gj.getStatus(tempString).equals("success")){
+                                SharedPreferences sharedPref = LoginActivity.this.getPreferences(Context.MODE_PRIVATE);
+
+                                SharedPreferences.Editor e = sharedPref.edit();
+                                int i = gj.getId(tempString);
+                                e.putInt("id", i);
+                                Users u = gs.fromJson(gj.getData(tempString), Users.class);
+                                e.putString("email", u.getEmail());
+
+                                Toast.makeText(LoginActivity.this, "Welcome", Toast.LENGTH_SHORT).show();
+                
+                                Intent intent = new Intent(LoginActivity.this, MapsActivity.class);
+                                startActivity(intent);
+
+                                //Toast.makeText(LoginActivity.this, ), Toast.LENGTH_SHORT).show();
+                            }else{
+                                Toast.makeText(LoginActivity.this, "Incorrect Login", Toast.LENGTH_SHORT).show();
+                            }
+
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        } catch (ExecutionException e) {
+                            e.printStackTrace();
+                        }
+                    }else{
+                        Toast.makeText(LoginActivity.this, "Please Enter a Email and Password", Toast.LENGTH_SHORT).show();
                     }
+
                     //(getTheStatus(temp.toString()));
                 }
             });
-
-
-
 
         } else {
             Intent intent = new Intent(LoginActivity.this, MapsActivity.class);
