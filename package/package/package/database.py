@@ -406,4 +406,5 @@ class PayPal(db.Model):
 if __name__ == "__main__":
     #db.drop_all()
     db.create_all()
+    db.update(Users)
     print("CHECKED")

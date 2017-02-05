@@ -31,40 +31,50 @@ def requires_auth(f):
 def api():
     database.db.drop_all()
     database.db.create_all()
-    database.db.update(database.Users)
+    #database.db.update(database.Users)
     return "OK"
 
-@app.route("/api/users/<action>/", methods=['GET'])
+@app.route("/api/users/<action>/", methods=['GET', 'POST'])
 @requires_auth
 def users(action):
     data = {'status': 'fail'}
     try:
-        if action == "insert":
-            s = dict(request.args)
-            s1 = {}
-            for k, v in enumerate(s):
-                s1[v] = s[v][0]
-            u = database.Users(**s1)
-            database.db.session.add(u)
-            database.db.session.commit()
-            data['lastid'] = u.id
-            data['status'] = 'success'
-        elif action == "select" and 'id' in request.args:
-            s = database.Users.query.filter_by(id=int(request.args.get('id'))).first()
-            data['data'] = s.Get_User_Info()
-            #data['user'] = s.as_dict()
-            data['status'] = 'success'
-        elif action == "name" and 'id' in request.args:
-            u = database.Users.query.filter_by(id=int(request.args.get('id'))).first()
-            data['name'] = (str(u.fname) + " " + str(u.lname)).title()
-            data['status'] = 'success'
-        elif action == "passwordcheck" and 'email' in request.args:
-            u = database.Users.query.filter_by(email=request.args.get('email')).first()
-            data['bool'] = u.Check_Password(request.args.get('password'))
-            data['status'] = 'success'
+        if "POST" == request.method:
+            u = database.Users.query.filter_by(email=str(request.form['email'])).first()
+            data['bool'] = u.Check_Password(request.form['password'])
+            if data['bool']:
+                data['data'] = u.Get_User_Info()
+                data['id'] = u.id or ''
+                data['status'] = 'success'
+            else:
+                data['data'] = {}
         else:
-            data['data'] = {}
-            data['status'] = 'success'
+            if action == "insert":
+                s = dict(request.args)
+                s1 = {}
+                for k, v in enumerate(s):
+                    s1[v] = s[v][0]
+                u = database.Users(**s1)
+                database.db.session.add(u)
+                database.db.session.commit()
+                data['id'] = u.id
+                data['status'] = 'success'
+            elif action == "select" and 'id' in request.args:
+                s = database.Users.query.filter_by(id=int(request.args.get('id'))).first()
+                data['data'] = s.Get_User_Info()
+                #data['user'] = s.as_dict()
+                data['status'] = 'success'
+            elif action == "name" and 'id' in request.args:
+                u = database.Users.query.filter_by(id=int(request.args.get('id'))).first()
+                data['name'] = (str(u.fname) + " " + str(u.lname)).title()
+                data['status'] = 'success'
+            elif action == "passwordcheck" and 'email' in request.args:
+                u = database.Users.query.filter_by(email=request.args.get('email')).first()
+                data['bool'] = u.Check_Password(request.args.get('password'))
+                data['status'] = 'success'
+            else:
+                data['data'] = {}
+                data['status'] = 'success'
     except Exception as e:
         data['message'] = str(e)
     finally:
@@ -84,7 +94,7 @@ def riders(action):
             u = database.Riders(**s1)
             database.db.session.add(u)
             database.db.session.commit()
-            data['lastid'] = u.id
+            data['id'] = u.id
             data['status'] = 'success'
         elif action == "select" and 'email' in request.args:
             s = database.Riders.query.filter_by(email=request.args.get('email')).first()
