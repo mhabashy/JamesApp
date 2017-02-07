@@ -134,7 +134,9 @@
             android:layout_height="70dp"
             android:layout_gravity="center_vertical"
             android:gravity="center"
-            android:textAlignment="center">
+            android:textAlignment="center"
+            android:textColor="@drawable/text_style">
+
         </ListView>
 
         <Button
@@ -156,15 +158,31 @@
         android:background="#FFFFFF"
         android:padding="4dp"
         android:layout_gravity="bottom"
-        tools:orientation="horizontal">
+        tools:orientation="horizontal"
+        android:gravity="center">
         <RadioButton
             android:id="@+id/bicycle"
-             android:button="@drawable/bicycle"
+            android:button="@drawable/bicycle"
             android:layout_height="wrap_content"
-            android:layout_width="wrap_content"/>
+            android:layout_width="wrap_content" />
         <RadioButton
             android:id="@+id/vispa"
             android:button="@drawable/vispa"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"/>
+        <RadioButton
+            android:id="@+id/sedan"
+            android:button="@drawable/sedan"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"/>
+        <RadioButton
+            android:id="@+id/van"
+            android:button="@drawable/van"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"/>
+        <RadioButton
+            android:id="@+id/pickup"
+            android:button="@drawable/pickup"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"/>
     </RadioGroup>

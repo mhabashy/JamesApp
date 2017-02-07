@@ -2,10 +2,15 @@ package co.jamesapp.android;
 
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.ColorFilter;
+
+import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -13,13 +18,12 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.RecyclerView;
+import android.text.Selection;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RadioButton;
@@ -27,37 +31,32 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import co.jamesapp.android.R;
 //import com.example.currentplacedetailsonmap.R;
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.appindexing.Thing;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.identity.intents.Address;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.places.PlaceLikelihood;
-import com.google.android.gms.location.places.PlaceLikelihoodBuffer;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.wearable.Asset;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
+import java.util.List;
+import java.util.Locale;
+
 
 import static android.widget.RadioGroup.*;
 
@@ -120,6 +119,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+      
+        
     }
 
 
@@ -181,7 +182,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                  .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-
     }
 
     /**
@@ -220,7 +220,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
      * This callback is triggered when the map is ready to be used.
      */
     @Override
-    public void onMapReady(GoogleMap map) {
+    public void onMapReady(final GoogleMap map) {
         mMap = map;
 
         // Turn on the My Location layer and the related control on the map.
@@ -257,12 +257,32 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
          * If the previous state was saved, set the position to the saved state.
          * If the current location is unknown, use a default position and zoom value.
          */
+        String response;
         if (mCameraPosition != null) {
             mMap.moveCamera(CameraUpdateFactory.newCameraPosition(mCameraPosition));
         } else if (mCurrentLocation != null) {
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                     new LatLng(mCurrentLocation.getLatitude(),
                             mCurrentLocation.getLongitude()), DEFAULT_ZOOM));
+            Geocoder geocoder;
+            List<android.location.Address> addresses;
+            geocoder = new Geocoder(this, Locale.getDefault());
+
+            try {
+                addresses = geocoder.getFromLocation(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude(), 1);
+                String address = addresses.get(0).getAddressLine(0);
+                String state = addresses.get(0).getAdminArea();
+                String country = addresses.get(0).getCountryName();
+                String city = addresses.get(0).getLocality();
+                String postalCode = addresses.get(0).getPostalCode();
+                String knownName = addresses.get(0).getFeatureName();
+                Toast.makeText(getApplicationContext(), "Address."+ address + city+state+country,
+                        Toast.LENGTH_LONG).show();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            // In this sample, get just a single address.
+
         } else {
             Log.d(TAG, "Current location is null. Using defaults.");
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM));
@@ -273,14 +293,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         Calendar cal = Calendar.getInstance();
         int hours = cal.get(Calendar.HOUR_OF_DAY);
 
-        String[] values = {"Android","IPhone","WindowsMobile"};
-        final ArrayList<String> list = new ArrayList<String>();
+        final ArrayList<String> list = new ArrayList<>();
         for (int i = 0; i < 5; ++i) {
-            list.add(String.valueOf(hours));
+            list.add(String.valueOf(hours)+":00");
             hours++;
         }
-        final ArrayAdapter adapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_item, list);
+        final ArrayAdapter adapter = new ArrayAdapter<>(this,
+                R.layout.example_layout, list);
 
 
     final RadioGroup pickup = (RadioGroup) findViewById(R.id.pickup_time_radiogroup);
@@ -290,7 +309,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 Toast.makeText(getApplicationContext(), "Your toast message.",
                         Toast.LENGTH_SHORT).show();
-                 final LinearLayout listViewContainer = (LinearLayout) findViewById(R.id.pickupTimeListViewContainer);
+                  final LinearLayout listViewContainer = (LinearLayout) findViewById(R.id.pickupTimeListViewContainer);
                   final ListView listView = (ListView) findViewById(R.id.pickupTimeListView);
                   final Button btnTag = (Button)findViewById(R.id.submitPickUpTime);
 //                  RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) listView.getLayoutParams();
@@ -308,6 +327,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         Toast.makeText(getApplicationContext(), "In Click.",
                                 Toast.LENGTH_SHORT).show();
                         TextView pickItemText = (TextView) findViewById(R.id.pickupItemText);
+//                        listView.setSelection(position);
+//                        listView.requestFocus();
 
                         String selectedFromList =(String) (listView.getItemAtPosition(position));
                         pickItemText.setText(selectedFromList);
@@ -318,6 +339,58 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             }
 
+        });
+
+        final RadioGroup vehicleType = (RadioGroup) findViewById(R.id.vehicleType);
+        vehicleType.setOnCheckedChangeListener(new OnCheckedChangeListener(){
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+
+//                    Toast.makeText(getApplicationContext(), "Your car is." + checkedId,
+//                            Toast.LENGTH_SHORT).show();
+
+                int selectedId = vehicleType.getCheckedRadioButtonId();
+
+                RadioButton radioButton = (RadioButton) findViewById(selectedId);
+
+                boolean checked =   radioButton.isChecked();
+                switch(radioButton.getId()) {
+                    case R.id.bicycle:
+                        if (checked) {
+                            Toast.makeText(getApplicationContext(), "bike",
+                            Toast.LENGTH_SHORT).show();
+                        }
+                            break;
+
+                    case R.id.vispa:
+                        if (checked) {
+                            Toast.makeText(getApplicationContext(), "vispa",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                        break;
+                    case R.id.sedan:
+                        if (checked) {
+                            Toast.makeText(getApplicationContext(), "sedan",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                        break;
+
+                    case R.id.van:
+                        if (checked)
+                            // Ninjas rule
+                            Toast.makeText(getApplicationContext(), "Van",
+                                    Toast.LENGTH_SHORT).show();
+                            break;
+                    case R.id.pickup:
+                        if (checked) {
+                            Toast.makeText(getApplicationContext(), "pickup",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                        break;
+                }
+
+
+            }
         });
     }
 
